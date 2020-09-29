@@ -178,52 +178,53 @@ process gwas_2_spa_tests {
 /*--------------------------------------------------
   GWAS Analysis 2 with SAIGE - Generate report
 ---------------------------------------------------*/
+if (!params.skip_report) {
+  process create_report {
+    tag "report"
+    publishDir "${params.outdir}/MultiQC/", mode: 'copy'
 
-process create_report {
-  tag "report"
-  publishDir "${params.outdir}/MultiQC/", mode: 'copy'
+    input:
+    file(saige_output) from ch_report.collect()
+    file(gwas_cat) from ch_gwas_cat
 
-  input:
-  file(saige_output) from ch_report.collect()
-  file(gwas_cat) from ch_gwas_cat
+    output:
+    file "multiqc_report.html" into ch_report_outputs
+    set file("*png"), file("*ipynb"), file("*csv") into ch_report_outputs_all
 
-  output:
-  file "multiqc_report.html" into ch_report_outputs
-  set file("*png"), file("*ipynb"), file("*csv") into ch_report_outputs_all
+    script:
 
-  script:
+    """
+    cp /opt/bin/* .
+    
+    # creates 2 .csv files, saige_results_<params.output_tag>.csv, saige_results_top_n.csv
+    concat_chroms.R \
+        --saige_output_name='saige_results' \
+        --filename_pattern='${params.saige_filename_pattern}' \
+        --output_tag='${params.output_tag}' \
+        --top_n_sites=${params.top_n_sites} \
+        --max_top_n_sites=${params.max_top_n_sites}
 
-  """
-  cp /opt/bin/* .
-  
-  # creates 2 .csv files, saige_results_<params.output_tag>.csv, saige_results_top_n.csv
-  concat_chroms.R \
-    --saige_output_name='saige_results' \
-    --filename_pattern='${params.saige_filename_pattern}' \
-    --output_tag='${params.output_tag}' \
-    --top_n_sites=${params.top_n_sites} \
-    --max_top_n_sites=${params.max_top_n_sites}
+    # creates gwascat_subset.csv
+    subset_gwascat.R \
+        --saige_output='saige_results_${params.output_tag}.csv' \
+        --gwas_cat='${gwas_cat}'
 
-  # creates gwascat_subset.csv
-  subset_gwascat.R \
-    --saige_output='saige_results_${params.output_tag}.csv' \
-    --gwas_cat='${gwas_cat}'
+    # creates <params.output_tag>_manhattan.png with analysis.csv as input
+    manhattan.R \
+        --saige_output='saige_results_${params.output_tag}.csv' \
+        --output_tag='${params.output_tag}'
 
-  # creates <params.output_tag>_manhattan.png with analysis.csv as input
-  manhattan.R \
-    --saige_output='saige_results_${params.output_tag}.csv' \
-    --output_tag='${params.output_tag}'
+    # creates <params.output_tag>_qqplot_ci.png with analysis.csv as input
+    qqplot.R \
+        --saige_output='saige_results_${params.output_tag}.csv' \
+        --output_tag='${params.output_tag}'
 
-  # creates <params.output_tag>_qqplot_ci.png with analysis.csv as input
-  qqplot.R \
-    --saige_output='saige_results_${params.output_tag}.csv' \
-    --output_tag='${params.output_tag}'
+    # Generates the report
+    Rscript -e "rmarkdown::render('gwas_report.Rmd', params = list(manhattan='${params.output_tag}_manhattan.png',qqplot='${params.output_tag}_qqplot_ci.png', gwascat='gwascat_subset.csv', saige_results='saige_results_top_n.csv'))"
+    mv gwas_report.html multiqc_report.html
 
-  # Generates the report
-  Rscript -e "rmarkdown::render('gwas_report.Rmd', params = list(manhattan='${params.output_tag}_manhattan.png',qqplot='${params.output_tag}_qqplot_ci.png', gwascat='gwascat_subset.csv', saige_results='saige_results_top_n.csv'))"
-  mv gwas_report.html multiqc_report.html
-
-  # Generates the ipynb
-  jupytext --to ipynb gwas_report.Rmd
-  """
+    # Generates the ipynb
+    jupytext --to ipynb gwas_report.Rmd
+    """
+  }
 }

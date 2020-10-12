@@ -101,6 +101,7 @@ lambda<-function(pvalues){
 #Plotting qqplots
 
 analysis <- data.table::fread(saige_output)
+analysis[["CHR"]] <- as.numeric(sub("chr","",analysis[["CHR"]]))
 
 colnames(analysis)[which(colnames(analysis)=="POS")]="BP"
 colnames(analysis)[which(colnames(analysis)=="p.value")]="P"

@@ -148,7 +148,7 @@ cat("manhattan_colour_2 : ", manhattan_colour_2 ,"\n",sep="")
 #Plotting manhattan plots
 
 analysis <- data.table::fread(saige_output)
-analysis[["CHR"]] <- sub("chr","",analysis[["CHR"]])
+analysis[["CHR"]] <- as.numeric(sub("chr","",analysis[["CHR"]]))
 
 png(filename = paste0(output_tag, "_", "manhattan" , ".png") ,
     width    = width,

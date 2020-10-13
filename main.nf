@@ -38,6 +38,8 @@ Channel
   Pre-GWAS filtering - download, filter and convert VCFs
 ---------------------------------------------------*/
 
+if ( params.skip_gwas_filtering) { filteredVcfsCh = vcfsCh }
+if (!params.skip_gwas_filtering) {
 process gwas_filtering {
   tag "$name"
   publishDir "${params.outdir}/gwas_filtering", mode: 'copy'
@@ -105,6 +107,7 @@ process gwas_filtering {
   cat ${name}_filtered.header.vcf.gz ${name}.filtered_temp.vcf.gz > ${name}.filtered_final.vcf.gz
   bcftools index ${name}.filtered_final.vcf.gz
   """
+}
 }
 
 /*--------------------------------------------------

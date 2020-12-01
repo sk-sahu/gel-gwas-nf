@@ -62,18 +62,18 @@ process gwas_filtering {
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
   bcftools view -q ${params.qFilter} $vcf -Oz -o ${name}_filtered.vcf.gz
   bcftools index ${name}_filtered.vcf.gz
- 
+
   # Create PLINK binary from vcf.gz
   plink2 \
     --make-bed \
-    --set-missing-var-ids @:#,\\\$r,\\\$a \
+    --set-missing-var-ids '${params.plink_set_missing_var_ids}' \
     --vcf ${name}_filtered.vcf.gz \
     --out ${name}_filtered \
-    --vcf-half-call m \
+    --vcf-half-call ${params.plink_vcf_half_call} \
     --double-id \
     --set-hh-missing \
-    --new-id-max-allele-len 60 missing
-
+    --new-id-max-allele-len ${params.plink_new_id_max_allele_len} missing \
+    --output-chr  ${params.plink_output_chr}
   #Filter missingness
   plink \
     --bfile ${name}_filtered \
@@ -84,9 +84,10 @@ process gwas_filtering {
     --out ${name} \
     --1 \
     --keep-allele-order \
-    ${extra_plink_filter_missingness_options}
+    ${extra_plink_filter_missingness_options} \
+    --output-chr ${params.plink_output_chr}
 
-  awk '\$5 < ${params.thres_m} {print}' ${name}.missing > ${name}.missing_FAIL
+  awk -v thresm=${params.thres_m} '\$5 < thresm {print}'  ${name}.missing > ${name}.missing_FAIL
 
   #Filter HWE
   plink \
@@ -100,8 +101,8 @@ process gwas_filtering {
     --exclude ${name}.missing_FAIL \
     --1 \
     --keep-allele-order \
-    ${extra_plink_filter_missingness_options}
-
+    ${extra_plink_filter_missingness_options} \
+    --output-chr ${params.plink_output_chr}
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.misHWEfiltered.bim - | bgzip > ${name}.filtered_temp.vcf.gz
   bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz
   cat ${name}_filtered.header.vcf.gz ${name}.filtered_temp.vcf.gz > ${name}.filtered_final.vcf.gz

@@ -17,7 +17,8 @@ RUN apt-get update && \
               libperl-dev \
               libxt-dev \
               speedtest-cli \
-              procps
+              procps \
+              gawk
 
 #Install htslib developmental version specific commit
 RUN mkdir htslib && \

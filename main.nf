@@ -162,12 +162,11 @@ process gwas_2_spa_tests {
   script:
   """
   step2_SPAtests.R \
-    --vcfFile=${vcf} \
-    --vcfFileIndex=${index} \
-    --vcfField=GT \
+    --bgenFile=${vcf} \
+    --bgenFileIndex=${index} \
     --chrom=${chr} \
     --minMAC=20 \
-    --sampleFile=day0_covid.samples \
+    --sampleFile=${params.sampleFile} \
     --GMMATmodelFile=${rda} \
     --varianceRatioFile=${varianceRatio} \
     --SAIGEOutputFile=${params.phenoCol}.${name}.SAIGE.gwas.txt \

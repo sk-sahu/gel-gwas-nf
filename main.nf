@@ -171,6 +171,7 @@ process gwas_2_spa_tests {
     --bgenFileIndex=${index} \
     --chrom=${chr} \
     --minMAC=20 \
+    --minMAF=0.05 \
     --sampleFile=${sampleFile} \
     --GMMATmodelFile=${rda} \
     --varianceRatioFile=${varianceRatio} \

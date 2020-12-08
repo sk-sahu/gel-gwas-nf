@@ -17,6 +17,10 @@ Channel
   .ifEmpty { exit 1, "Pheno file not found: ${params.phenoFile}" }
   .into { phenoCh; phenoCh_gwas_filtering}
 Channel
+  .fromPath(params.sampleFile)
+  .ifEmpty { exit 1, "Sample file not found: ${params.sampleFile}" }
+  .set { sampleCh }
+Channel
   .fromFilePairs("${params.plinkFile}",size:3, flat : true)
   .ifEmpty { exit 1, "PLINK files not found: ${params.plinkFile}" }
   .set { plinkCh }

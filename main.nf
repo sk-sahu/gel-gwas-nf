@@ -158,6 +158,7 @@ process gwas_2_spa_tests {
   set val(name), val(chr), file(vcf), file(index) from filteredVcfsCh
   each file(rda) from rdaCh
   each file(varianceRatio) from varianceRatioCh
+  each file(sampleFile) from sampleCh
 
   output:
   file "*" into results
@@ -170,7 +171,7 @@ process gwas_2_spa_tests {
     --bgenFileIndex=${index} \
     --chrom=${chr} \
     --minMAC=20 \
-    --sampleFile=${params.sampleFile} \
+    --sampleFile=${sampleFile} \
     --GMMATmodelFile=${rda} \
     --varianceRatioFile=${varianceRatio} \
     --SAIGEOutputFile=${params.phenoCol}.${name}.SAIGE.gwas.txt \

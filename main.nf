@@ -67,7 +67,7 @@ tabix ${name}.masked.vcf.gz
 
 bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
             -i 'F_MISSING<0.05'
-tabix ${name}.masked_filtered.vcf.gz
+bcftools index ${name}.masked_filtered.vcf.gz
 """
 }
 }

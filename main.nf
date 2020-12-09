@@ -111,8 +111,9 @@ process gwas_filtering {
     --set-hh-missing \
     --new-id-max-allele-len ${params.plink_new_id_max_allele_len} missing \
     --output-chr  ${params.plink_output_chr}
+  
   #Filter missingness
-  plink \
+  plink2 \
     --bfile ${name}_filtered \
     --pheno $phenofile \
     --pheno-name ${params.phenoCol} \
@@ -127,7 +128,7 @@ process gwas_filtering {
   awk -v thresm=${params.thres_m} '\$5 < thresm {print}'  ${name}.missing > ${name}.missing_FAIL
 
   #Filter HWE
-  plink \
+  plink2 \
     --bfile ${name}_filtered \
     --pheno $phenofile \
     --pheno-name ${params.phenoCol} \

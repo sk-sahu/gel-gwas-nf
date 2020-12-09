@@ -37,19 +37,52 @@ Channel
   .fromPath(params.gwas_cat)
   .ifEmpty { exit 1, "Cannot find GWAS catalogue CSV  file : ${params.gwas_cat}" }
   .set { ch_gwas_cat }
+/*--------------------------------------------------
+  Pre-GWAS masking - download and mask vcfs
+---------------------------------------------------*/
+if ( params.skip_masking) { maskedVcfsCh = vcfsCh }
+if (!params.skip_masking) {
+process gwas_masking {
+  tag "$name"
+  publishDir "${params.outdir}/gwas_masking", mode: 'copy'
+  
+  input:
+  set val(name), val(chr), file(vcf), file(index) from vcfsCh
+
+  output:
+  set val(name), val(chr), file("${name}.masked_filtered.vcf.gz"), file("${name}.masked_filtered.vcf.gz.csi") into maskedVcfsCh
+  
+  script:
+ """ 
+  bcftools +setGT ${input_vcf} -Ou -- \
+            -t q \
+            -i \"FMT/DP<10 | FMT/GQ<20\" \
+            -n . \
+        | bcftools +setGT -Ou -- \
+            -t \"b:AD<=0.001\" \
+            -n . \
+        | bcftools view \
+            -Oz -o ${name}.masked.vcf.gz
+tabix ${name}.masked.vcf.gz
+
+bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
+            -i 'F_MISSING<0.05'
+tabix ${name}.masked_filtered.vcf.gz
+"""
+}
 
 /*--------------------------------------------------
   Pre-GWAS filtering - download, filter and convert VCFs
 ---------------------------------------------------*/
 
-if ( params.skip_gwas_filtering) { filteredVcfsCh = vcfsCh }
+if ( params.skip_gwas_filtering) { filteredVcfsCh = maskedVcfsCh }
 if (!params.skip_gwas_filtering) {
 process gwas_filtering {
   tag "$name"
   publishDir "${params.outdir}/gwas_filtering", mode: 'copy'
 
   input:
-  set val(name), val(chr), file(vcf), file(index) from vcfsCh
+  set val(name), val(chr), file(vcf), file(index) from maskedVcfsCh
   each file(phenofile) from phenoCh_gwas_filtering
   each file(plink_keep_file) from plink_keep_pheno_ch
 
@@ -150,6 +183,40 @@ process gwas_1_fit_null_glmm {
   GWAS Analysis 2 with SAIGE - Perform mixed-model association testing
 ---------------------------------------------------*/
 
+if (params.gwas_2_spa_tests_vcf) {
+process gwas_2_spa_tests {
+  tag "$name"
+  publishDir "${params.outdir}/gwas_2_spa_tests", mode: 'copy'
+
+  input:
+  set val(name), val(chr), file(vcf), file(index) from filteredVcfsCh
+  each file(rda) from rdaCh
+  each file(varianceRatio) from varianceRatioCh
+
+  output:
+  file "*" into results
+  file("*.SAIGE.gwas.txt") into ch_saige_output
+
+  script:
+  """
+  step2_SPAtests.R \
+    --vcfFile=${vcf} \
+    --vcfFileIndex=${index} \
+    --vcfField=GT \
+    --chrom=${chr} \
+    --minMAC=20 \
+    --GMMATmodelFile=${rda} \
+    --varianceRatioFile=${varianceRatio} \
+    --SAIGEOutputFile="${params.pheno_col.replaceAll(/\s/,'_').replaceAll(/\(|\)/, '')}.${name}.SAIGE.gwas.txt" \
+    --numLinesOutput=2 \
+    --IsOutputAFinCaseCtrl=TRUE \
+    --IsDropMissingDosages=FALSE \
+    --IsOutputNinCaseCtrl=TRUE \
+    --IsOutputHetHomCountsinCaseCtrl=TRUE
+  """
+}
+
+if (!params.gwas_2_spa_tests_vcf) {
 process gwas_2_spa_tests {
   tag "$name"
   publishDir "${params.outdir}/gwas_2_spa_tests", mode: 'copy'

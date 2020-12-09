@@ -215,7 +215,7 @@ process gwas_2_spa_tests {
     --IsOutputHetHomCountsinCaseCtrl=TRUE
   """
 }
-
+}
 if (!params.gwas_2_spa_tests_vcf) {
 process gwas_2_spa_tests {
   tag "$name"
@@ -249,7 +249,7 @@ process gwas_2_spa_tests {
     --IsOutputHetHomCountsinCaseCtrl=TRUE
   """
 }
-
+}
 /*--------------------------------------------------
   GWAS Analysis 2 with SAIGE - Generate report
 ---------------------------------------------------*/

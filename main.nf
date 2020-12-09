@@ -195,7 +195,7 @@ process gwas_2_spa_tests_vcf {
 
   output:
   file "*" into results
-  file("*.SAIGE.gwas.txt") into ch_saige_output
+  file("*.SAIGE.gwas.txt") into ch_report
 
   script:
   """

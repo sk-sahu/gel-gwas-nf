@@ -183,8 +183,8 @@ process gwas_1_fit_null_glmm {
   GWAS Analysis 2 with SAIGE - Perform mixed-model association testing
 ---------------------------------------------------*/
 
-if (params.gwas_2_spa_tests_vcf) {
-process gwas_2_spa_tests {
+if (params.gwas_2_spa_tests_format_switch) {
+process gwas_2_spa_tests_vcf {
   tag "$name"
   publishDir "${params.outdir}/gwas_2_spa_tests", mode: 'copy'
 
@@ -216,8 +216,8 @@ process gwas_2_spa_tests {
   """
 }
 }
-if (!params.gwas_2_spa_tests_vcf) {
-process gwas_2_spa_tests {
+if (!params.gwas_2_spa_tests_format_switch) {
+process gwas_2_spa_tests_bgen {
   tag "$name"
   publishDir "${params.outdir}/gwas_2_spa_tests", mode: 'copy'
 

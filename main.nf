@@ -88,6 +88,8 @@ process gwas_filtering {
 
   output:
   set val(name), val(chr), file("${name}.filtered_final.vcf.gz"), file("${name}.filtered_final.vcf.gz.csi") into filteredVcfsCh
+  set val(name), val(chr), file("${name}.filtered_final.bgen")) into filteredbgenCh
+  
   file("${name}_filtered.{bed,bim,fam}") into plinkTestCh
 
   script:
@@ -134,17 +136,20 @@ process gwas_filtering {
     --pheno-name ${params.phenoCol} \
     --allow-no-sex \
     --hwe ${params.thres_HWE} midp \
-    --out ${name}.misHWEfiltered \
+    --out ${name}.filtered_final \
     --make-just-bim \
     --exclude ${name}.missing_FAIL \
     --1 \
     --keep-allele-order \
     ${extra_plink_filter_missingness_options} \
-    --output-chr ${params.plink_output_chr}
-  bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.misHWEfiltered.bim - | bgzip > ${name}.filtered_temp.vcf.gz
+    --output-chr ${params.plink_output_chr} \
+    --export bgen-1.2 bits=8 ref-first
+    
+  bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
   bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz
   cat ${name}_filtered.header.vcf.gz ${name}.filtered_temp.vcf.gz > ${name}.filtered_final.vcf.gz
   bcftools index ${name}.filtered_final.vcf.gz
+  
   """
 }
 }

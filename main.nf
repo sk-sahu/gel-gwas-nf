@@ -88,7 +88,7 @@ process gwas_filtering {
 
   output:
   set val(name), val(chr), file("${name}.filtered_final.vcf.gz"), file("${name}.filtered_final.vcf.gz.csi") into filteredVcfsCh
-  set val(name), val(chr), file("${name}.filtered_final.bgen")) into filteredbgenCh
+  set val(name), val(chr), file("${name}.filtered_final.bgen") into filteredbgenCh
   
   file("${name}_filtered.{bed,bim,fam}") into plinkTestCh
 

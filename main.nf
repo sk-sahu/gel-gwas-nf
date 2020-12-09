@@ -115,7 +115,7 @@ process gwas_filtering {
     --output-chr  ${params.plink_output_chr}
   
   #Filter missingness
-  plink2 \
+  plink \
     --bfile ${name}_filtered \
     --pheno $phenofile \
     --pheno-name ${params.phenoCol} \

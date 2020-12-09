@@ -70,7 +70,7 @@ bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
 tabix ${name}.masked_filtered.vcf.gz
 """
 }
-
+}
 /*--------------------------------------------------
   Pre-GWAS filtering - download, filter and convert VCFs
 ---------------------------------------------------*/

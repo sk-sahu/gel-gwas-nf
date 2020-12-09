@@ -207,10 +207,10 @@ process gwas_2_spa_tests_vcf {
     --minMAC=20 \
     --GMMATmodelFile=${rda} \
     --varianceRatioFile=${varianceRatio} \
-    --SAIGEOutputFile="${params.pheno_col.replaceAll(/\s/,'_').replaceAll(/\(|\)/, '')}.${name}.SAIGE.gwas.txt" \
+    --SAIGEOutputFile=${params.phenoCol}.${name}.SAIGE.gwas.txt \
     --numLinesOutput=2 \
     --IsOutputAFinCaseCtrl=TRUE \
-    --IsDropMissingDosages=FALSE \
+    --IsDropMissingDosages=TRUE \
     --IsOutputNinCaseCtrl=TRUE \
     --IsOutputHetHomCountsinCaseCtrl=TRUE
   """

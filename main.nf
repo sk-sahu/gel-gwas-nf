@@ -130,7 +130,7 @@ process gwas_filtering {
   awk -v thresm=${params.thres_m} '\$5 < thresm {print}'  ${name}.missing > ${name}.missing_FAIL
 
   #Filter HWE
-  plink2 \
+  plink \
     --bfile ${name}_filtered \
     --pheno $phenofile \
     --pheno-name ${params.phenoCol} \
@@ -142,9 +142,14 @@ process gwas_filtering {
     --1 \
     --keep-allele-order \
     ${extra_plink_filter_missingness_options} \
-    --output-chr ${params.plink_output_chr} \
-    --export bgen-1.2 bits=8 ref-first
-    
+    --output-chr ${params.plink_output_chr}
+
+  #Make bgen
+  plink2 \
+  --bfile ${name}_filtered \
+  --extract ${name}.filtered_final.bim \
+  --export bgen-1.2 bits=8 ref-first
+
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
   bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz
   cat ${name}_filtered.header.vcf.gz ${name}.filtered_temp.vcf.gz > ${name}.filtered_final.vcf.gz

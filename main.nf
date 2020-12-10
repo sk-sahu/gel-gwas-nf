@@ -148,6 +148,7 @@ process gwas_filtering {
   plink2 \
   --bfile ${name}_filtered \
   --extract ${name}.filtered_final.bim \
+  --out ${name}.filtered_final \
   --export bgen-1.2 bits=8 ref-first
 
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz

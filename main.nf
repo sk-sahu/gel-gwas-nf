@@ -152,7 +152,8 @@ process gwas_filtering {
   --bfile ${name}_filtered \
   --extract ${name}.filtered_final.bim \
   --out ${name}.filtered_final \
-  --export bgen-1.2 bits=8 ref-first
+  --export bgen-1.2 bits=8 ref-first \
+  --output-chr ${params.plink_output_chr}
 
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
   bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz

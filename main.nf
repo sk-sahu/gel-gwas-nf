@@ -280,7 +280,8 @@ if (!params.skip_report) {
 
     output:
     file "multiqc_report.html" into ch_report_outputs
-    set file("*png"), file("*ipynb"), file("*csv") into ch_report_outputs_all
+    set file("*png"), file("*csv") into ch_report_outputs_all
+    #set file("*png"), file("*ipynb"), file("*csv") into ch_report_outputs_all
 
     script:
 

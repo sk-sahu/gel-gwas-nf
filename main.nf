@@ -65,8 +65,8 @@ process gwas_masking {
             -Oz -o ${name}.masked.vcf.gz
 tabix ${name}.masked.vcf.gz
 
-myFile = file("${name}.vcf.gz")
-result = myFile.delete()
+#myFile = file("${name}.vcf.gz")
+#result = myFile.delete()
 
 bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
             -i 'F_MISSING<0.05'

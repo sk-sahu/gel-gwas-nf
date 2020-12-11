@@ -115,7 +115,9 @@ process gwas_filtering {
     --double-id \
     --set-hh-missing \
     --new-id-max-allele-len ${params.plink_new_id_max_allele_len} missing \
-    --output-chr  ${params.plink_output_chr}
+    --output-chr  ${params.plink_output_chr} \
+    --memory 2000 \
+    --threads 2
   
   #Filter missingness
   plink \
@@ -128,7 +130,9 @@ process gwas_filtering {
     --1 \
     --keep-allele-order \
     ${extra_plink_filter_missingness_options} \
-    --output-chr ${params.plink_output_chr}
+    --output-chr ${params.plink_output_chr} \
+    --memory 2000 \
+    --threads 2
 
   awk -v thresm=${params.thres_m} '\$5 < thresm {print}'  ${name}.missing > ${name}.missing_FAIL
 
@@ -145,7 +149,9 @@ process gwas_filtering {
     --1 \
     --keep-allele-order \
     ${extra_plink_filter_missingness_options} \
-    --output-chr ${params.plink_output_chr}
+    --output-chr ${params.plink_output_chr} \
+    --memory 2000 \
+    --threads 2
 
   #Make bgen
   plink2 \
@@ -153,7 +159,9 @@ process gwas_filtering {
   --extract ${name}.filtered_final.bim \
   --out ${name}.filtered_final \
   --export bgen-1.2 bits=8 ref-first \
-  --output-chr ${params.plink_output_chr}
+  --output-chr ${params.plink_output_chr} \
+  --memory 2000 \
+  --threads 2
 
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
   bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz

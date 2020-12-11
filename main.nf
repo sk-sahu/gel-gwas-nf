@@ -279,8 +279,8 @@ if (!params.skip_report) {
     file(gwas_cat) from ch_gwas_cat
 
     output:
-    file "multiqc_report.html" into ch_report_outputs
     set file("*png"), file("*csv") into ch_report_outputs_all
+    #file "multiqc_report.html" into ch_report_outputs
     #set file("*png"), file("*ipynb"), file("*csv") into ch_report_outputs_all
 
     script:

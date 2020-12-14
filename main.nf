@@ -37,6 +37,7 @@ Channel
   .fromPath(params.gwas_cat)
   .ifEmpty { exit 1, "Cannot find GWAS catalogue CSV  file : ${params.gwas_cat}" }
   .set { ch_gwas_cat }
+  
 /*--------------------------------------------------
   Pre-GWAS masking - download and mask vcfs
 ---------------------------------------------------*/
@@ -74,8 +75,9 @@ bcftools index ${name}.masked_filtered.vcf.gz
 """
 }
 }
+
 /*--------------------------------------------------
-  Pre-GWAS filtering - download, filter and convert VCFs
+  Pre-GWAS filtering - Filter vcfs based on vcf stats, differential missingness and HWE.
 ---------------------------------------------------*/
 
 if ( params.skip_gwas_filtering) { filteredVcfsCh = maskedVcfsCh }
@@ -91,18 +93,16 @@ process gwas_filtering {
 
   output:
   set val(name), val(chr), file("${name}.filtered_final.vcf.gz"), file("${name}.filtered_final.vcf.gz.csi") into filteredVcfsCh
-  set val(name), val(chr), file("${name}.filtered_final.bgen") into filteredbgenCh
   
   file("${name}_filtered.{bed,bim,fam}") into plinkTestCh
 
   script:
-  // TODO: (High priority) Only extract needed individuals from VCF files with `bcftools -S samples.txt` - get from samples file?
   // TODO: (Not required) `bcftools -T sites_to_extract.txt`
   // Optional parameters
   extra_plink_filter_missingness_options = params.plink_keep_pheno != "s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/nodata" ? "--keep ${plink_keep_file}" : ""
   """
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
-  bcftools view -q ${params.qFilter} $vcf -Oz -o ${name}_filtered.vcf.gz
+  bcftools view -q ${params.qFilter} $vcf -S ${sampleFile} -Oz -o ${name}_filtered.vcf.gz
   bcftools index ${name}_filtered.vcf.gz
 
   # Create PLINK binary from vcf.gz
@@ -119,7 +119,7 @@ process gwas_filtering {
     --memory 2000 \
     --threads 2
   
-  #Filter missingness
+  #Filter for differential missingness missingness
   plink \
     --bfile ${name}_filtered \
     --pheno $phenofile \
@@ -153,16 +153,6 @@ process gwas_filtering {
     --memory 2000 \
     --threads 2
 
-  #Make bgen
-  plink2 \
-  --bfile ${name}_filtered \
-  --extract ${name}.filtered_final.bim \
-  --out ${name}.filtered_final \
-  --export bgen-1.2 bits=8 ref-first \
-  --output-chr ${params.plink_output_chr} \
-  --memory 2000 \
-  --threads 2
-
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
   bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz
   cat ${name}_filtered.header.vcf.gz ${name}.filtered_temp.vcf.gz > ${name}.filtered_final.vcf.gz
@@ -171,6 +161,44 @@ process gwas_filtering {
   """
 }
 }
+
+/*--------------------------------------------------
+  Create bgen files 
+---------------------------------------------------*/
+
+if (!params.skip_bgen_creation) {
+process bgen_creation {
+  tag "$name"
+  publishDir "${params.outdir}/bgen_files", mode: 'copy'
+
+  input:
+  set val(name), val(chr), file(vcf), file(index) from filteredVcfsCh
+  
+  output:
+  set val(name), val(chr), file("${name}.filtered_final.bgen"), file("${name}.filtered_final.bgen.bgi") into filteredbgenCh
+  
+  script:
+  
+  #Make bgen
+  plink2 \
+  --vcf ${vcf} \
+  --set-missing-var-ids '${params.plink_set_missing_var_ids}' \
+  --vcf-half-call ${params.plink_vcf_half_call} \
+  --new-id-max-allele-len ${params.plink_new_id_max_allele_len} missing \
+  --double-id \
+  --out ${name}.filtered_final \
+  --export bgen-1.2 bits=8 ref-first \
+  --output-chr ${params.plink_output_chr} \
+  --memory 2000 \
+  --threads 2
+
+  #index bgen files
+  bgenix -g ${name}.filtered_final.bgen -index
+  
+  """
+}
+}
+  
 
 /*--------------------------------------------------
   GWAS Analysis 1 with SAIGE - Fit the null mixed-model
@@ -213,7 +241,7 @@ process gwas_2_spa_tests_vcf {
   publishDir "${params.outdir}/gwas_2_spa_tests", mode: 'copy'
 
   input:
-  set val(name), val(chr), file(vcf), file(index) from filteredVcfsCh
+  set val(name), val(chr), file(vcf), file(vcfindex) from filteredVcfsCh
   each file(rda) from rdaCh
   each file(varianceRatio) from varianceRatioCh
 
@@ -225,7 +253,7 @@ process gwas_2_spa_tests_vcf {
   """
   step2_SPAtests.R \
     --vcfFile=${vcf} \
-    --vcfFileIndex=${index} \
+    --vcfFileIndex=${vcfindex} \
     --vcfField=GT \
     --chrom=${chr} \
     --minMAC=20 \
@@ -240,13 +268,14 @@ process gwas_2_spa_tests_vcf {
   """
 }
 }
+
 if (!params.gwas_2_spa_tests_format_switch) {
 process gwas_2_spa_tests_bgen {
   tag "$name"
   publishDir "${params.outdir}/gwas_2_spa_tests", mode: 'copy'
 
   input:
-  set val(name), val(chr), file(vcf), file(index) from filteredVcfsCh
+  set val(name), val(chr), file(bgen), file(bgenindex) from filteredbgenCh
   each file(rda) from rdaCh
   each file(varianceRatio) from varianceRatioCh
   each file(sampleFile) from sampleCh
@@ -258,8 +287,8 @@ process gwas_2_spa_tests_bgen {
   script:
   """
   step2_SPAtests.R \
-    --bgenFile=${vcf} \
-    --bgenFileIndex=${index} \
+    --bgenFile=${bgen} \
+    --bgenFileIndex=${bgenindex} \
     --chrom=${chr} \
     --minMAC=20 \
     --sampleFile=${sampleFile} \

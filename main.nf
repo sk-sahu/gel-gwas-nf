@@ -196,7 +196,7 @@ process bgen_creation {
   --threads 2
 
   #index bgen files
-  bgenix -g ${name}.filtered_final.bgen -index
+  #bgenix -g ${name}.filtered_final.bgen -index
   
   """
 }

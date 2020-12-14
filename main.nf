@@ -167,13 +167,14 @@ process gwas_filtering {
 ---------------------------------------------------*/
 if (!params.skip_bgen_creation) {
 process bgen_creation {
-  filteredVcfsChforbgen=filteredVcfsCh
+  
+  filteredVcfsCh.into { filteredVcfsCh; filteredVcfsChforbgen }
   
   tag "$name"
   publishDir "${params.outdir}/bgen_files", mode: 'copy'
 
   input:
-  set val(name), val(chr), file(vcf), file(index) from filteredVcfsChforbgen
+  set val(name), val(chr), file(vcf), file(index) from filteredVcfsChbgen
   
   output:
   set val(name), val(chr), file("${name}.filtered_final.bgen"), file("${name}.filtered_final.bgen.bgi") into filteredVcfsChbgen
@@ -276,7 +277,7 @@ process gwas_2_spa_tests_bgen {
   publishDir "${params.outdir}/gwas_2_spa_tests", mode: 'copy'
 
   input:
-  set val(name), val(chr), file(bgen), file(bgenindex) from filteredbgenCh
+  set val(name), val(chr), file(bgen), file(bgenindex) from filteredVcfsChbgen
   each file(rda) from rdaCh
   each file(varianceRatio) from varianceRatioCh
   each file(sampleFile) from sampleCh

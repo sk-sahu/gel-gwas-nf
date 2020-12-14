@@ -178,7 +178,7 @@ process bgen_creation {
   set val(name), val(chr), file(vcf), file(index) from filteredVcfsChforbgen
   
   output:
-  set val(name), val(chr), file("${name}.filtered_final.bgen"), file("${name}.filtered_final.bgen.bgi") into filteredVcfsChbgen
+  set val(name), val(chr), file("${name}.filtered_final.bgen") into filteredVcfsChbgen
   
   script:
   """
@@ -196,7 +196,7 @@ process bgen_creation {
   --threads 2
 
   #index bgen files
-  bgenix -g ${name}.filtered_final.bgen -index
+  #bgenix -g ${name}.filtered_final.bgen -index
   
   """
 }

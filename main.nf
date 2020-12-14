@@ -90,6 +90,7 @@ process gwas_filtering {
   set val(name), val(chr), file(vcf), file(index) from maskedVcfsCh
   each file(phenofile) from phenoCh_gwas_filtering
   each file(plink_keep_file) from plink_keep_pheno_ch
+  each file(sampleFile) from sampleCh
 
   output:
   set val(name), val(chr), file("${name}.filtered_final.vcf.gz"), file("${name}.filtered_final.vcf.gz.csi") into filteredVcfsCh

@@ -300,7 +300,7 @@ process gwas_2_spa_tests_bgen {
     --SAIGEOutputFile=${params.phenoCol}.${name}.SAIGE.gwas.txt \
     --numLinesOutput=2 \
     --IsOutputAFinCaseCtrl=TRUE \
-    --IsDropMissingDosages=TRUE \
+    --IsDropMissingDosages=FALSE \
     --IsOutputNinCaseCtrl=TRUE \
     --IsOutputHetHomCountsinCaseCtrl=TRUE
   """

@@ -174,7 +174,7 @@ process bgen_creation {
   publishDir "${params.outdir}/bgen_files", mode: 'copy'
 
   input:
-  set val(name), val(chr), file(vcf), file(index) from filteredVcfsChbgen
+  set val(name), val(chr), file(vcf), file(index) from filteredVcfsChforbgen
   
   output:
   set val(name), val(chr), file("${name}.filtered_final.bgen"), file("${name}.filtered_final.bgen.bgi") into filteredVcfsChbgen

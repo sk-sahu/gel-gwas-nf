@@ -178,7 +178,7 @@ process bgen_creation {
   set val(name), val(chr), file("${name}.filtered_final.bgen"), file("${name}.filtered_final.bgen.bgi") into filteredbgenCh
   
   script:
-  
+  """
   #Make bgen
   plink2 \
   --vcf ${vcf} \

@@ -210,10 +210,12 @@ if (params.use_null_plink) {
 process gwas_1_fit_null_glmm_nullplink {
   tag "$plink_GRM_snps"
   publishDir "${params.outdir}/gwas_1_fit_null_glmm", mode: 'copy'
+  
+  sampleCh.into { sampleCh; sampleChforplinknull }
 
   input:
   each file(phenoFile) from phenoCh
-  each file(sampleFile) from sampleCh
+  each file(sampleFile) from sampleChforplinknull
   
   output:
   file "*" into fit_null_glmm_results

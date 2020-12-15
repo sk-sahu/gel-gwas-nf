@@ -22,7 +22,6 @@ Channel
   .set { sampleCh }
 Channel
   .fromFilePairs("${params.plinkFile}",size:3, flat : true)
-  .ifEmpty { exit 1, "PLINK files not found: ${params.plinkFile}" }
   .set { plinkCh }
 Channel
   .fromPath(params.plink_keep_pheno)

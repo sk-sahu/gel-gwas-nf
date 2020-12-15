@@ -37,6 +37,8 @@ Channel
   .ifEmpty { exit 1, "Cannot find GWAS catalogue CSV  file : ${params.gwas_cat}" }
   .set { ch_gwas_cat }
   
+sampleCh.into { sampleCh; sampleChforplinknull }
+  
 /*--------------------------------------------------
   Pre-GWAS masking - download and mask vcfs
 ---------------------------------------------------*/
@@ -210,8 +212,6 @@ if (params.use_null_plink) {
 process gwas_1_fit_null_glmm_nullplink {
   tag "$plink_GRM_snps"
   publishDir "${params.outdir}/gwas_1_fit_null_glmm", mode: 'copy'
-  
-  sampleCh.into { sampleCh; sampleChforplinknull }
 
   input:
   each file(phenoFile) from phenoCh

@@ -207,7 +207,7 @@ process bgen_creation {
   GWAS Analysis 1 with SAIGE - Fit the null mixed-model
 ---------------------------------------------------*/
 if (params.use_null_plink) {
-process gwas_1_fit_null_glmm {
+process gwas_1_fit_null_glmm_nullplink {
   tag "$plink_GRM_snps"
   publishDir "${params.outdir}/gwas_1_fit_null_glmm", mode: 'copy'
 

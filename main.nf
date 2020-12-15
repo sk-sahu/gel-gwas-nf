@@ -236,6 +236,7 @@ process gwas_1_fit_null_glmm {
     --outputPrefix_varRatio=step1_${params.phenoCol} \
     --nThreads=${task.cpus} ${params.saigeStep1ExtraFlags}
   """
+}
 }else{
 process gwas_1_fit_null_glmm {
   tag "$plink_GRM_snps"
@@ -263,7 +264,7 @@ process gwas_1_fit_null_glmm {
     --nThreads=${task.cpus} ${params.saigeStep1ExtraFlags}
   """
 }
-
+}
 /*--------------------------------------------------
   GWAS Analysis 2 with SAIGE - Perform mixed-model association testing
 ---------------------------------------------------*/

@@ -30,7 +30,7 @@ Channel
   .fromPath(params.vcfsList)
   .ifEmpty { exit 1, "Cannot find CSV VCFs file : ${params.vcfsList}" }
   .splitCsv(skip:1)
-  .map { chr, vcf, index -> [file(vcf).simpleName, chr, file(vcf), file(index)] }
+  .map { chr, vcf, index -> [file(vcf), chr, file(vcf), file(index)] }
   .set { vcfsCh }
 Channel
   .fromPath(params.gwas_cat)

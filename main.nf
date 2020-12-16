@@ -56,7 +56,7 @@ process gwas_masking {
   
   script:
  """ 
-  bcftools +setGT ${name}.vcf.gz -Ou -- \
+  bcftools +setGT ${vcf} -Ou -- \
             -t q \
             -i \"FMT/DP<10 | FMT/GQ<20\" \
             -n . \

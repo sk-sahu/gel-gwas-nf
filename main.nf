@@ -209,13 +209,31 @@ process bgen_creation {
   GWAS Analysis 1 with SAIGE - Fit the null mixed-model
 ---------------------------------------------------*/
 if (params.use_null_plink) {
+
+process gwas_1_generate_nullplink {
+  tag "$plink_GRM_snps"
+  publishDir "${params.outdir}/nullplink", mode: 'copy'
+
+  input:
+  each file(sampleFile) from sampleChforplinknull
+  
+  output:
+  set val("synthetic_plink"),file("synthetic_plink.bed"), file("synthetic_plink.bim"), file("synthetic_plink.bed") into nullplinkch
+
+  script:
+  """
+  echo "60000 null 0.00 1.00 1.00 1.00" > gwas_sim.txt
+  plink --simulate gwas_sim.txt --make-bed --out synthetic_plink --simulate-ncontrols 2504 --simulate-ncases 0
+  awk '{print \$0 " " \$0 " 0 0 0 -9"}' ${sampleFile} > synthetic_plink.fam
+  """
+}
 process gwas_1_fit_null_glmm_nullplink {
   tag "$plink_GRM_snps"
   publishDir "${params.outdir}/gwas_1_fit_null_glmm", mode: 'copy'
 
   input:
   each file(phenoFile) from phenoCh
-  each file(sampleFile) from sampleChforplinknull
+  set val(plink_GRM_snps), file(bed), file(bim), file(fam) from nullplinkch
   
   output:
   file "*" into fit_null_glmm_results
@@ -224,12 +242,8 @@ process gwas_1_fit_null_glmm_nullplink {
 
   script:
   """
-  echo "60000 null 0.00 1.00 1.00 1.00" > gwas_sim.txt
-  plink --simulate gwas_sim.txt --make-bed --out synthetic_plink --simulate-ncontrols 2504 --simulate-ncases 0
-  awk '{print \$0 " " \$0 " 0 0 0 -9"}' ${sampleFile} > synthetic_plink.fam
-  
   step1_fitNULLGLMM.R \
-    --plinkFile=synthetic_plink \
+    --plinkFile=${plink_GRM_snps} \
     --phenoFile=${phenoFile} \
     --phenoCol=${params.phenoCol} \
     --sampleIDColinphenoFile=IID \

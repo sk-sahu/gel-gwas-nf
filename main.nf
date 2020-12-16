@@ -52,7 +52,7 @@ process gwas_masking {
   set val(name), val(chr), file(vcf), file(index) from vcfsCh
 
   output:
-  set val(name), val(chr), file("${name}.masked_filtered.vcf.gz"), file("${name}.masked_filtered.vcf.gz.csi") into maskedVcfsCh
+  set val(${vcf}), val(chr), file("${name}.masked_filtered.vcf.gz"), file("${name}.masked_filtered.vcf.gz.csi") into maskedVcfsCh
   
   script:
  """ 
@@ -64,15 +64,15 @@ process gwas_masking {
             -t \"b:AD<=0.001\" \
             -n . \
         | bcftools view \
-            -Oz -o ${name}.masked.vcf.gz
-tabix ${name}.masked.vcf.gz
+            -Oz -o ${vcf}.masked.vcf.gz
+tabix ${vcf}.masked.vcf.gz
 
 #myFile = file("${name}.vcf.gz")
 #result = myFile.delete()
 
-bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
+bcftools view ${vcf}.masked.vcf.gz -Oz -o ${vcf}.masked_filtered.vcf.gz \
             -i 'F_MISSING<0.05'
-bcftools index ${name}.masked_filtered.vcf.gz
+bcftools index ${vcf}.masked_filtered.vcf.gz
 """
 }
 }

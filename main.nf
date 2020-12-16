@@ -211,7 +211,7 @@ process gwas_1_generate_nullplink {
   each file(sampleFile) from sampleChforplinknull
   
   output:
-  set val("synthetic_plink"),file("synthetic_plink.bed"), file("synthetic_plink.bim"), file("synthetic_plink.bed") into nullplinkch
+  set val("synthetic_plink"),file("synthetic_plink.bed"), file("synthetic_plink.bim"), file("synthetic_plink.fam") into nullplinkch
 
   script:
   """

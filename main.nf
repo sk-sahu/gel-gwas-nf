@@ -56,14 +56,7 @@ process gwas_masking {
   
   script:
  """ 
-  bcftools +setGT ${vcf} -Ou -- \
-            -t q \
-            -i \"FMT/DP<10 | FMT/GQ<20\" \
-            -n . \
-        | bcftools +setGT -Ou -- \
-            -t \"b:AD<=0.001\" \
-            -n . \
-        | bcftools view \
+  bcftools view ${vcf} \
             -Oz -o ${vcf}.masked.vcf.gz
 tabix ${vcf}.masked.vcf.gz
 

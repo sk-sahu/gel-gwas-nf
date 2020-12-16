@@ -56,7 +56,7 @@ process gwas_masking {
   
   script:
  """ 
-  bcftools view ${vcf} \
+  bcftools view ${vcf} --max-alleles 2 \
             -Oz -o ${vcf}.masked.vcf.gz
 tabix ${vcf}.masked.vcf.gz
 

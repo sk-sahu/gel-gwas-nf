@@ -52,7 +52,7 @@ process gwas_masking {
   set val(name), val(chr), file(vcf), file(index) from vcfsCh
 
   output:
-  set val(${vcf}), val(chr), file("${name}.masked_filtered.vcf.gz"), file("${name}.masked_filtered.vcf.gz.csi") into maskedVcfsCh
+  set val("${vcf}"), val(chr), file("${vcf}.masked_filtered.vcf.gz"), file("${vcf}.masked_filtered.vcf.gz.csi") into maskedVcfsCh
   
   script:
  """ 

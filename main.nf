@@ -60,9 +60,6 @@ process gwas_masking {
             -Oz -o ${vcf}.masked.vcf.gz
 tabix ${vcf}.masked.vcf.gz
 
-#myFile = file("${name}.vcf.gz")
-#result = myFile.delete()
-
 bcftools view ${vcf}.masked.vcf.gz -Oz -o ${vcf}.masked_filtered.vcf.gz \
             -i 'F_MISSING<0.05'
 bcftools index ${vcf}.masked_filtered.vcf.gz
@@ -191,7 +188,6 @@ process bgen_creation {
 
   #index bgen files
   #bgenix -g ${name}.filtered_final.bgen -index
-  df -h 
   
   """
 }

@@ -213,7 +213,7 @@ process gwas_1_generate_nullplink {
   """
   echo "60000 null 0.00 1.00 1.00 1.00" > gwas_sim.txt
   plink --simulate gwas_sim.txt --make-bed --out synthetic_plink --simulate-ncontrols 2504 --simulate-ncases 0
-  awk '{print \$0 " " \$0 " 0 0 0 -9"}' ${sampleFile} > synthetic_plink.fam
+  awk '{print \$1 " " \$1 " 0 0 0 -9"}' ${sampleFile} > synthetic_plink.fam
   """
 }
 process gwas_1_fit_null_glmm_nullplink {

@@ -1,12 +1,17 @@
 # GEL GWAS
-
-![](bin/covid_1_manhattan.png)
-
+To be used for local tests. 
 ## Example usage
 ```bash
 nextflow run main.nf \
-  --plinkFile "s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/sampleA.{bed,bim,fam}" \
-  --phenoFile s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/sample.phe \
-  --phenoCol PHE \
-  --vcfsList s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/vcfs.csv
+  --plinkFile "sampleA.{bed,bim,fam}" \
+  --phenoFile "pheno.txt" \
+  --phenoCol pheno \
+  --vcfsList "vcfs_list.csv" \
+  --skip_gwas_filtering false \
+  --skip_masking false \
+  --gwas_cat "gwascat.csv" \
+  --sampleFile "samples.txt" \
+  --skip_report false \
+  --plink_output_chr 26 \
+  -with-dag flowchart.png
 ```

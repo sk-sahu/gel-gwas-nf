@@ -55,14 +55,7 @@ process gwas_masking {
   
   script:
  """ 
-  bcftools +setGT ${name}.vcf.gz -Ou -- \
-            -t q \
-            -i \"FMT/DP<10 | FMT/GQ<20\" \
-            -n . \
-        | bcftools +setGT -Ou -- \
-            -t \"b:AD<=0.001\" \
-            -n . \
-        | bcftools view \
+  bcftools view ${name}.vcf.gz \
             -Oz -o ${name}.masked.vcf.gz
 tabix ${name}.masked.vcf.gz
 
@@ -105,7 +98,7 @@ process gwas_filtering {
   extra_plink_filter_missingness_options = params.plink_keep_pheno != "s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/nodata" ? "--keep ${plink_keep_file}" : ""
   """
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
-  bcftools view -q ${params.qFilter} $vcf -S ${sampleFile} -Oz -o ${name}_filtered.vcf.gz
+  bcftools view -q ${params.qFilter} $vcf -Oz -o ${name}_filtered.vcf.gz
   bcftools index ${name}_filtered.vcf.gz
 
   # Create PLINK binary from vcf.gz
@@ -343,15 +336,15 @@ if (!params.skip_report) {
         --gwas_cat='${gwas_cat}'
 
     # creates <params.output_tag>_manhattan.png with analysis.csv as input
-    manhattan.R \
-        --saige_output='saige_results_${params.output_tag}.csv' \
-        --output_tag='${params.output_tag}' \
-        --p_value_cutoff='5e-8'
+    #manhattan.R \
+    #    --saige_output='saige_results_${params.output_tag}.csv' \
+    #    --output_tag='${params.output_tag}' \
+    #   --p_value_cutoff='5e-8'
 
     # creates <params.output_tag>_qqplot_ci.png with analysis.csv as input
-    qqplot.R \
-        --saige_output='saige_results_${params.output_tag}.csv' \
-        --output_tag='${params.output_tag}'
+    #qqplot.R \
+    #    --saige_output='saige_results_${params.output_tag}.csv' \
+    #    --output_tag='${params.output_tag}'
 
     # Generates the report
     #Rscript -e "rmarkdown::render('gwas_report.Rmd', params = list(manhattan='${params.output_tag}_manhattan.png',qqplot='${params.output_tag}_qqplot_ci.png', gwascat='gwascat_subset.csv', saige_results='saige_results_top_n.csv'))"

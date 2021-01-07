@@ -15,3 +15,7 @@ nextflow run main.nf \
   --plink_output_chr 26 \
   -with-dag flowchart.png
 ```
+
+Get gwascat.csv file by running
+
+wget https://lifebit-featured-datasets.s3-eu-west-1.amazonaws.com/projects/gel/gel-gwas/gwascat.csv

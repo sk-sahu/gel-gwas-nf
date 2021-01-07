@@ -2,7 +2,7 @@
 To be used for local tests. 
 ## Example usage
 ```bash
-nextflow run ~/gel_gwas_nf2/gel-gwas-nf/main.nf \
+nextflow run main.nf \
   --plinkFile "sampleA.{bed,bim,fam}" \
   --phenoFile "pheno.txt" \
   --phenoCol pheno \

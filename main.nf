@@ -64,10 +64,10 @@ process gwas_masking {
             -n . \
         | bcftools view \
             -Oz -o ${name}.masked.vcf.gz
-tabix "${name}.masked.vcf.gz"
+tabix \${name}.masked.vcf.gz
 
 du -h
-rm "$(realpath ${vcf})"
+rm \$(realpath \${vcf})
 echo "removal"
 du -h
 

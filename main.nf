@@ -75,8 +75,9 @@ bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
 
 bcftools index ${name}.masked_filtered.vcf.gz
 
-#rm "\$(realpath \${name}.masked.vcf.gz)"
- 
+rm \$(realpath ${name}.masked.vcf.gz)
+rm \$(realpath ${name}.masked.vcf.gz.csi)
+
 """
 }
 }

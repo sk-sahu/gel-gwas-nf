@@ -66,14 +66,18 @@ process gwas_masking {
             -Oz -o ${name}.masked.vcf.gz
 tabix ${name}.masked.vcf.gz
 
+readlink ${vcf}
+
+ls
 rm ${vcf} ${index}
+ls
 
 bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
             --max-alleles 2 \
             -i 'F_MISSING<0.05'
 bcftools index ${name}.masked_filtered.vcf.gz
 
-rm ${name}.masked.vcf.gz
+readlink ${name}.masked.vcf.gz
 """
 }
 }

@@ -64,20 +64,20 @@ process gwas_masking {
             -n . \
         | bcftools view \
             -Oz -o ${name}.masked.vcf.gz
-tabix \${name}.masked.vcf.gz
+tabix ${name}.masked.vcf.gz
 
-du -h
-rm \$(realpath \${vcf})
-echo "removal"
-du -h
+#du -h
+#rm \$(realpath \${vcf})
+#echo "removal"
+#du -h
 
 bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
             --max-alleles 2 \
             -i 'F_MISSING<0.05'
 
-bcftools index \${name}.masked_filtered.vcf.gz
+bcftools index ${name}.masked_filtered.vcf.gz
 
-rm "\$(realpath \${name}.masked.vcf.gz)"
+#rm "\$(realpath \${name}.masked.vcf.gz)"
  
 """
 }

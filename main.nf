@@ -111,6 +111,9 @@ process gwas_filtering {
   bcftools view -q ${params.qFilter} $vcf -S ${sampleFile} -Oz -o ${name}_filtered.vcf.gz
   bcftools index ${name}_filtered.vcf.gz
 
+  rm \$(realpath ${vcf})
+  rm \$(realpath ${index})
+
   # Create PLINK binary from vcf.gz
   plink2 \
     --make-bed \

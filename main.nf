@@ -108,7 +108,9 @@ process gwas_filtering {
   extra_plink_filter_missingness_options = params.plink_keep_pheno != "s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/nodata" ? "--keep ${plink_keep_file}" : ""
   """
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
-  bcftools view -q ${params.qFilter} -c ${params.acFilter} $vcf -S ${sampleFile} -Oz -o ${name}_filtered.vcf.gz
+  bcftools view $vcf -S ${sampleFile} \
+        | bcftools -q ${params.qFilter} -c ${params.acFilter} \
+        -Oz -o ${name}_filtered.vcf.gz
   bcftools index ${name}_filtered.vcf.gz
 
   rm \$(realpath ${vcf})

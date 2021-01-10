@@ -108,7 +108,7 @@ process gwas_filtering {
   extra_plink_filter_missingness_options = params.plink_keep_pheno != "s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/nodata" ? "--keep ${plink_keep_file}" : ""
   """
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
-  bcftools view -q ${params.qFilter} $vcf -S ${sampleFile} -Oz -o ${name}_filtered.vcf.gz
+  bcftools view -q ${params.qFilter} -c ${params.acFilter} $vcf -S ${sampleFile} -Oz -o ${name}_filtered.vcf.gz
   bcftools index ${name}_filtered.vcf.gz
 
   rm \$(realpath ${vcf})
@@ -164,8 +164,13 @@ process gwas_filtering {
 
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
   bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz
+
+  rm \$(realpath ${name}_filtered.vcf.gz)
+
   cat ${name}_filtered.header.vcf.gz ${name}.filtered_temp.vcf.gz > ${name}.filtered_final.vcf.gz
   bcftools index ${name}.filtered_final.vcf.gz
+
+  rm \$(realpath ${name}.filtered_temp.vcf.gz)
   
   """
 }

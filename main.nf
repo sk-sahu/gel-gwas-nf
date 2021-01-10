@@ -109,7 +109,7 @@ process gwas_filtering {
   """
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
   bcftools view $vcf -S ${sampleFile} \
-        | bcftools -q ${params.qFilter} -c ${params.acFilter} \
+        | bcftools view -q ${params.qFilter} -c ${params.acFilter} \
         -Oz -o ${name}_filtered.vcf.gz
   bcftools index ${name}_filtered.vcf.gz
 

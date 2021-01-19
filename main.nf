@@ -258,7 +258,9 @@ if (params.gwas_2_spa_tests_format_switch) {
 process gwas_2_spa_tests_vcf {
   tag "$name"
   publishDir "${params.outdir}/gwas_2_spa_tests", mode: 'copy'
-
+  
+  errorStrategy 'ignore'
+  
   input:
   set val(name), val(chr), file(vcf), file(vcfindex) from filteredVcfsCh
   each file(rda) from rdaCh

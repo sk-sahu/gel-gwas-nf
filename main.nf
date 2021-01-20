@@ -63,6 +63,7 @@ process gwas_masking {
             -t \"b:AD<=0.001\" \
             -n . \
         | bcftools view \
+            --threads 2 \
             -Oz -o ${name}.masked.vcf.gz
 tabix ${name}.masked.vcf.gz
 
@@ -71,6 +72,7 @@ rm \$(realpath ${index})
 
 bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
             --max-alleles 2 \
+            --threads 2 \
             -i 'F_MISSING<0.05'
 
 bcftools index ${name}.masked_filtered.vcf.gz
@@ -110,6 +112,7 @@ process gwas_filtering {
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
   bcftools view $vcf -S ${sampleFile} \
         | bcftools view -q ${params.qFilter} -c ${params.acFilter} \
+        --threads 2 \
         -Oz -o ${name}_filtered.vcf.gz
   bcftools index ${name}_filtered.vcf.gz
 
@@ -165,7 +168,7 @@ process gwas_filtering {
     --threads 2
 
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
-  bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz
+  bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz --threads 2 
 
   rm \$(realpath ${name}_filtered.vcf.gz)
 

@@ -67,17 +67,15 @@ process gwas_masking {
             -Oz -o ${name}.masked.vcf.gz
 tabix ${name}.masked.vcf.gz
 
-rm \$(realpath ${vcf})
-rm \$(realpath ${index})
+#rm \$(realpath ${vcf})
+#rm \$(realpath ${index})
 
-bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
-            --max-alleles 2 \
-            --threads 2 \
-            -i 'F_MISSING<0.05'
+bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz --threads 2 -i 'F_MISSING<0.05'
 
 tabix ${name}.masked_filtered.vcf.gz
+du -h ${name}.masked_filtered.vcf.gz
 
-rm \$(realpath ${name}.masked.vcf.gz)
+#rm \$(realpath ${name}.masked.vcf.gz)
 
 """
 }
@@ -116,8 +114,8 @@ process gwas_filtering {
         -Oz -o ${name}_filtered.vcf.gz
   tabix ${name}_filtered.vcf.gz
 
-  rm \$(realpath ${vcf})
-  rm \$(realpath ${index})
+#  rm \$(realpath ${vcf})
+#  rm \$(realpath ${index})
 
   # Create PLINK binary from vcf.gz
   plink2 \
@@ -170,12 +168,12 @@ process gwas_filtering {
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
   bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz --threads 2 
 
-  rm \$(realpath ${name}_filtered.vcf.gz)
+#  rm \$(realpath ${name}_filtered.vcf.gz)
 
   cat ${name}_filtered.header.vcf.gz ${name}.filtered_temp.vcf.gz > ${name}.filtered_final.vcf.gz
   tabix ${name}.filtered_final.vcf.gz
 
-  rm \$(realpath ${name}.filtered_temp.vcf.gz)
+#  rm \$(realpath ${name}.filtered_temp.vcf.gz)
   
   """
 }
@@ -214,9 +212,7 @@ process bgen_creation {
   --threads 2
 
   #index bgen files
-  bgenix -g ${name}.filtered_final.bgen -index
-  df -h 
-  
+  bgenix -g ${name}.filtered_final.bgen -index 
   """
 }
 }

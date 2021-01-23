@@ -51,7 +51,7 @@ process gwas_masking {
   set val(name), val(chr), file(vcf), file(index) from vcfsCh
 
   output:
-  set val(name), val(chr), file("${name}.masked_filtered.vcf.gz"), file("${name}.masked_filtered.vcf.gz.csi") into maskedVcfsCh
+  set val(name), val(chr), file("${name}.masked_filtered.vcf.gz"), file("${name}.masked_filtered.vcf.gz.tbi") into maskedVcfsCh
   
   script:
  """ 
@@ -65,7 +65,7 @@ process gwas_masking {
         | bcftools view \
             --threads 2 \
             -Oz -o ${name}.masked.vcf.gz
-bcftools index ${name}.masked.vcf.gz
+tabix ${name}.masked.vcf.gz
 
 rm \$(realpath ${vcf})
 rm \$(realpath ${index})
@@ -75,7 +75,7 @@ bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz \
             --threads 2 \
             -i 'F_MISSING<0.05'
 
-bcftools index ${name}.masked_filtered.vcf.gz
+tabix ${name}.masked_filtered.vcf.gz
 
 rm \$(realpath ${name}.masked.vcf.gz)
 
@@ -100,7 +100,7 @@ process gwas_filtering {
   each file(sampleFile) from sampleCh
 
   output:
-  set val(name), val(chr), file("${name}.filtered_final.vcf.gz"), file("${name}.filtered_final.vcf.gz.csi") into filteredVcfsCh
+  set val(name), val(chr), file("${name}.filtered_final.vcf.gz"), file("${name}.filtered_final.vcf.gz.tbi") into filteredVcfsCh
   
   file("${name}_filtered.{bed,bim,fam}") into plinkTestCh
 
@@ -114,7 +114,7 @@ process gwas_filtering {
         | bcftools view -q ${params.qFilter} -c ${params.acFilter} \
         --threads 2 \
         -Oz -o ${name}_filtered.vcf.gz
-  bcftools index ${name}_filtered.vcf.gz
+  tabix ${name}_filtered.vcf.gz
 
   rm \$(realpath ${vcf})
   rm \$(realpath ${index})
@@ -173,7 +173,7 @@ process gwas_filtering {
   rm \$(realpath ${name}_filtered.vcf.gz)
 
   cat ${name}_filtered.header.vcf.gz ${name}.filtered_temp.vcf.gz > ${name}.filtered_final.vcf.gz
-  bcftools index ${name}.filtered_final.vcf.gz
+  tabix ${name}.filtered_final.vcf.gz
 
   rm \$(realpath ${name}.filtered_temp.vcf.gz)
   

@@ -65,7 +65,7 @@ process gwas_masking {
         | bcftools view \
             --threads 2 \
             -Oz -o ${name}.masked.vcf.gz
-tabix ${name}.masked.vcf.gz
+bcftools index ${name}.masked.vcf.gz
 
 rm \$(realpath ${vcf})
 rm \$(realpath ${index})

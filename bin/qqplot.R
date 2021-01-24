@@ -49,7 +49,7 @@ args         <- argsL
 rm(argsL)
 
 ## Give some value to optional arguments if not provided
-if(is.null(args$width)) {args$width = 12} else {args$width=as.numeric(args$width)}
+if(is.null(args$width)) {args$width = 6} else {args$width=as.numeric(args$width)}
 if(is.null(args$height)) {args$height = 6} else {args$height=as.numeric(args$height)}
 if(is.null(args$units)) {args$units = "in"} else {args$units=as.character(args$units)}
 if(is.null(args$type)) {args$type = getOption("bitmapType") }  else {args$type=as.character(args$type)}

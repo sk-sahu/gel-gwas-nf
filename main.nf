@@ -107,9 +107,13 @@ process gwas_filtering {
   // Optional parameters
   extra_plink_filter_missingness_options = params.plink_keep_pheno != "s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/nodata" ? "--keep ${plink_keep_file}" : ""
   """
+  sleep 30s
+
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
   bcftools view $vcf -S ${sampleFile} \
         | bcftools view -q ${params.qFilter} -c ${params.acFilter} \
+        -i 'INFO/OLD_MULTIALLELIC=\".\" \
+
         --threads 2 \
         -Oz -o ${name}_filtered.vcf.gz
   tabix ${name}_filtered.vcf.gz
@@ -166,6 +170,7 @@ process gwas_filtering {
     --threads 2
 
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
+
   bcftools view -h ${name}_filtered.vcf.gz -Oz -o ${name}_filtered.header.vcf.gz --threads 2 
 
   rm \$(realpath ${name}_filtered.vcf.gz)
@@ -198,6 +203,8 @@ process bgen_creation {
   
   script:
   """
+  sleep 10s
+
   #Make bgen
   plink2 \
   --vcf ${vcf} \
@@ -271,6 +278,8 @@ process gwas_2_spa_tests_vcf {
 
   script:
   """
+  sleep 10s
+
   step2_SPAtests.R \
     --vcfFile=${vcf} \
     --vcfFileIndex=${vcfindex} \
@@ -360,7 +369,8 @@ if (!params.skip_report) {
     manhattan.R \
         --saige_output='saige_results_${params.output_tag}.csv' \
         --output_tag='${params.output_tag}' \
-        --p_value_cutoff='5e-8'
+        --p_value_cutoff=5e-8 \
+        --cex=0.1
 
     # creates <params.output_tag>_qqplot_ci.png with analysis.csv as input
     qqplot.R \

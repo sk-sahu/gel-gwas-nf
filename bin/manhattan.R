@@ -82,8 +82,8 @@ if(is.null(args$res)) {args$res = 300} else {args$res=as.character(args$res)}
 if(is.null(args$cex)) {args$cex = 0.6} else {args$cex=as.character(args$cex)}
 if(is.null(args$cex_axis)) {args$cex_axis = 0.6} else {args$cex_axis=as.character(args$cex_axis)}
 if(is.null(args$suggestive_line)) {args$suggestive_line  = TRUE} else {args$suggestive_line=as.logical(args$suggestive_line)}
-if(is.null(args$manhattan_colour_1)) {args$manhattan_colour_1 = "#4e4b4c"} else {args$manhattan_colour_1=as.character(args$manhattan_colour_1)}
-if(is.null(args$manhattan_colour_2)) {args$manhattan_colour_2 = "#4dc5ce"} else {args$manhattan_colour_2=as.character(args$manhattan_colour_2)}
+if(is.null(args$manhattan_colour_1)) {args$manhattan_colour_1 = "black"} else {args$manhattan_colour_1=as.character(args$manhattan_colour_1)}
+if(is.null(args$manhattan_colour_2)) {args$manhattan_colour_2 = "grey"} else {args$manhattan_colour_2=as.character(args$manhattan_colour_2)}
 if(is.null(args$bp_col)) {args$bp_col = "POS"} else {args$bp_col=as.character(args$bp_col)}
 if(is.null(args$snp_col)) {args$snp_col = "SNPID"} else {args$snp_col=as.character(args$snp_col)}
 if(is.null(args$p_val_col)) {args$p_val_col = "p.value"} else {args$p_val_col=as.character(args$p_val_col)}

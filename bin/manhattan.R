@@ -163,8 +163,6 @@ manhattan_plot <- qqman::manhattan(analysis,
                                    snp  = snp_col,
                                    main = title,
                                    col  = c(manhattan_colour_1, manhattan_colour_2),
-                                   highlight      =  analysis[[snp_col]] [analysis[[p_val_col]] < p_value_cutoff],
-                                   annotatePval   = p_value_cutoff,
                                    suggestiveline = -log10(p_value_cutoff))
 
 dev.off()

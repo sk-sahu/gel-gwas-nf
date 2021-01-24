@@ -112,7 +112,6 @@ process gwas_filtering {
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
   bcftools view $vcf -S ${sampleFile} \
         | bcftools view -q ${params.qFilter} -c ${params.acFilter} \
-        -i 'INFO/OLD_MULTIALLELIC=\".\"' \
         --threads 2 \
         -Oz -o ${name}_filtered.vcf.gz
   tabix ${name}_filtered.vcf.gz

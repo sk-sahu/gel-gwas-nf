@@ -63,7 +63,7 @@ process gwas_masking {
             -t \"b:AD<=0.001\" \
             -n . \
         | bcftools view \
-            --threads 2 \
+            --threads ${params.cpus} \
             -Oz -o ${name}.masked.vcf.gz
 tabix ${name}.masked.vcf.gz
 
@@ -76,6 +76,8 @@ tabix ${name}.masked_filtered.vcf.gz
 du -h ${name}.masked_filtered.vcf.gz
 
 rm \$(realpath ${name}.masked.vcf.gz)
+
+wait
 
 """
 }
@@ -107,12 +109,10 @@ process gwas_filtering {
   // Optional parameters
   extra_plink_filter_missingness_options = params.plink_keep_pheno != "s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/nodata" ? "--keep ${plink_keep_file}" : ""
   """
-  sleep 30s
-
   # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
   bcftools view $vcf -S ${sampleFile} \
         | bcftools view -q ${params.qFilter} -c ${params.acFilter} \
-        --threads 2 \
+        --threads ${params.cpus} \
         -Oz -o ${name}_filtered.vcf.gz
   tabix ${name}_filtered.vcf.gz
 
@@ -131,7 +131,7 @@ process gwas_filtering {
     --new-id-max-allele-len ${params.plink_new_id_max_allele_len} missing \
     --output-chr  ${params.plink_output_chr} \
     --memory 2000 \
-    --threads 2
+    --threads ${params.cpus}
   
   #Filter for differential missingness missingness
   plink \
@@ -146,7 +146,7 @@ process gwas_filtering {
     ${extra_plink_filter_missingness_options} \
     --output-chr ${params.plink_output_chr} \
     --memory 2000 \
-    --threads 2
+    --threads ${params.cpus}
 
   awk -v thresm=${params.thres_m} '\$5 < thresm {print}'  ${name}.missing > ${name}.missing_FAIL
 
@@ -165,7 +165,7 @@ process gwas_filtering {
     ${extra_plink_filter_missingness_options} \
     --output-chr ${params.plink_output_chr} \
     --memory 2000 \
-    --threads 2
+    --threads ${params.cpus}
 
   bcftools view ${name}_filtered.vcf.gz | awk -F '\\t' 'NR==FNR{c[\$1\$4\$6\$5]++;next}; c[\$1\$2\$4\$5] > 0' ${name}.filtered_final.bim - | bgzip > ${name}.filtered_temp.vcf.gz
 
@@ -201,8 +201,6 @@ process bgen_creation {
   
   script:
   """
-  sleep 10s
-
   #Make bgen
   plink2 \
   --vcf ${vcf} \
@@ -276,8 +274,6 @@ process gwas_2_spa_tests_vcf {
 
   script:
   """
-  sleep 10s
-
   step2_SPAtests.R \
     --vcfFile=${vcf} \
     --vcfFileIndex=${vcfindex} \

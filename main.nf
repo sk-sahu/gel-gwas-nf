@@ -49,9 +49,13 @@ process gwas_masking {
   
   input:
   set val(name), val(chr), file(vcf), file(index) from vcfsCh
+  each file(phenofile) from phenoCh_gwas_filtering
+  each file(plink_keep_file) from plink_keep_pheno_ch
+  each file(sampleFile) from sampleCh
 
   output:
-  set val(name), val(chr), file("${name}.masked_filtered.vcf.gz"), file("${name}.masked_filtered.vcf.gz.tbi") into maskedVcfsCh
+  set val(name), val(chr), file("${name}.filtered_final.vcf.gz"), file("${name}.filtered_final.vcf.gz.tbi") into filteredVcfsCh
+  set val(name), val(chr), file("${name}.filtered_final.bgen"),file("${name}.filtered_final.bgen.bgi") into filteredVcfsChbgen
   
   script:
  """ 
@@ -77,47 +81,13 @@ du -h ${name}.masked_filtered.vcf.gz
 
 rm \$(realpath ${name}.masked.vcf.gz)
 
-wait
+#SiteQC
 
-"""
-}
-}
-
-/*--------------------------------------------------
-  Pre-GWAS filtering - Filter vcfs based on vcf stats, differential missingness and HWE.
----------------------------------------------------*/
-
-if ( params.skip_gwas_filtering) { filteredVcfsCh = maskedVcfsCh }
-if (!params.skip_gwas_filtering) {
-process gwas_filtering {
-  tag "$name"
-  publishDir "${params.outdir}/gwas_filtering", mode: 'copy'
-
-  input:
-  set val(name), val(chr), file(vcf), file(index) from maskedVcfsCh
-  each file(phenofile) from phenoCh_gwas_filtering
-  each file(plink_keep_file) from plink_keep_pheno_ch
-  each file(sampleFile) from sampleCh
-
-  output:
-  set val(name), val(chr), file("${name}.filtered_final.vcf.gz"), file("${name}.filtered_final.vcf.gz.tbi") into filteredVcfsCh
-  
-  file("${name}_filtered.{bed,bim,fam}") into plinkTestCh
-
-  script:
-  // TODO: (Not required) `bcftools -T sites_to_extract.txt`
-  // Optional parameters
-  extra_plink_filter_missingness_options = params.plink_keep_pheno != "s3://lifebit-featured-datasets/projects/gel/gel-gwas/testdata/nodata" ? "--keep ${plink_keep_file}" : ""
-  """
-  # Download, filter and convert (bcf or vcf.gz) -> vcf.gz
-  bcftools view $vcf -S ${sampleFile} \
+bcftools view ${name}.masked_filtered.vcf.gz -S ${sampleFile} \
         | bcftools view -q ${params.qFilter} -c ${params.acFilter} \
         --threads ${params.cpus} \
         -Oz -o ${name}_filtered.vcf.gz
   tabix ${name}_filtered.vcf.gz
-
-  rm \$(realpath ${vcf})
-  rm \$(realpath ${index})
 
   # Create PLINK binary from vcf.gz
   plink2 \
@@ -177,30 +147,7 @@ process gwas_filtering {
   tabix ${name}.filtered_final.vcf.gz
 
   rm \$(realpath ${name}.filtered_temp.vcf.gz)
-  
-  """
-}
-}
 
-/*--------------------------------------------------
-  Create bgen files 
----------------------------------------------------*/
-if (!params.skip_bgen_creation) {
-process bgen_creation {
-  
-  filteredVcfsCh.into { filteredVcfsCh; filteredVcfsChforbgen }
-  
-  tag "$name"
-  publishDir "${params.outdir}/bgen_files", mode: 'copy'
-  echo true
-  input:
-  set val(name), val(chr), file(vcf), file(index) from filteredVcfsChforbgen
-  
-  output:
-  set val(name), val(chr), file("${name}.filtered_final.bgen"),file("${name}.filtered_final.bgen.bgi") into filteredVcfsChbgen
-  
-  script:
-  """
   #Make bgen
   plink2 \
   --vcf ${vcf} \
@@ -212,14 +159,14 @@ process bgen_creation {
   --export bgen-1.2 bits=8 ref-first \
   --output-chr ${params.plink_output_chr} \
   --memory 2000 \
-  --threads 2
+  --threads ${params.cpus}
 
   #index bgen files
   bgenix -g ${name}.filtered_final.bgen -index 
-  """
+
+"""
 }
 }
-  
 
 /*--------------------------------------------------
   GWAS Analysis 1 with SAIGE - Fit the null mixed-model

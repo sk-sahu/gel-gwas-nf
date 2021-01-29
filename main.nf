@@ -19,7 +19,7 @@ Channel
 Channel
   .fromPath(params.sampleFile)
   .ifEmpty { exit 1, "Sample file not found: ${params.sampleFile}" }
-  .set { sampleCh }
+  .into { sampleCh; sampleCh_bgen_spa }
 Channel
   .fromFilePairs("${params.plinkFile}",size:3, flat : true)
   .ifEmpty { exit 1, "PLINK files not found: ${params.plinkFile}" }
@@ -76,8 +76,6 @@ tabix ${name}.masked_filtered.vcf.gz
 du -h ${name}.masked_filtered.vcf.gz
 
 rm \$(realpath ${name}.masked.vcf.gz)
-
-wait
 
 """
 }
@@ -301,7 +299,7 @@ process gwas_2_spa_tests_bgen {
   set val(name), val(chr), file(bgen), file(bgenindex) from filteredVcfsChbgen
   each file(rda) from rdaCh
   each file(varianceRatio) from varianceRatioCh
-  each file(sampleFile) from sampleCh
+  each file(sampleFile) from sampleCh_bgen_spa
 
   output:
   file "*" into results

@@ -75,6 +75,8 @@ bcftools view ${name}.masked.vcf.gz -Oz -o ${name}.masked_filtered.vcf.gz --thre
 
 tabix ${name}.masked_filtered.vcf.gz
 du -h ${name}.masked_filtered.vcf.gz
+echo "list of files and their size"
+ls -lh
 
 #rm \$(realpath ${name}.masked.vcf.gz)
 md5sum ${name}.masked_filtered.vcf.gz
